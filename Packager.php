@@ -198,6 +198,7 @@ class Packager {
 				$contents = file_get_contents($path);
 			}
 
+			$output .= "/* " . str_replace($this->_package['sourcePath'], '', $path) . " */\n";
 			$output .= trim($contents) . "\n\n";
 		}
 
@@ -230,7 +231,7 @@ class Packager {
 			return $this->_scripts[$name];
 		}
 
-		throw new Exception(sprintf('Script %s does not exist.'));
+		throw new Exception(sprintf('Script %s does not exist.', $name));
 	}
 
 	/**

@@ -13,7 +13,7 @@ use \Exception;
 /**
  * Uses the JSMin class to minify Javascript files.
  *
- * @package	mjohnson.packager
+ * @package	mjohnson.packager.minifiers
  * @version	1.0.0
  */
 class JsMinifier implements Minifier {
