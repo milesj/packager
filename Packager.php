@@ -64,6 +64,7 @@ class Packager {
 	 * @access public
 	 * @param string $path
 	 * @param \mjohnson\packager\Minifier $minifier
+	 * @throws \Exception
 	 */
 	public function __construct($path, Minifier $minifier = null) {
 		if (substr($path, -1) !== '/') {
@@ -80,7 +81,7 @@ class Packager {
 		$package = array_merge(array(
 			'name' => '',
 			'description' => '',
-			'copyright' => '',
+			'copyright' => date('Y'),
 			'link' => '',
 			'license' => '',
 			'sourcePath' => '',
@@ -120,6 +121,15 @@ class Packager {
 		}
 	}
 
+	/**
+	 * Loop through the items and build a manifest.
+	 * Use the manifest to generate the output file.
+	 *
+	 * @access public
+	 * @param array $items
+	 * @return string
+	 * @throws \Exception
+	 */
 	public function package(array $items) {
 		foreach ($items as $item) {
 			$script = $this->_getScript($item);
@@ -134,7 +144,7 @@ class Packager {
 		}
 
 		// Minify and aggregate files
-		$output = '/**';
+		$output = "/**\n";
 
 		foreach (array('name', 'description', 'copyright', 'link', 'license', 'authors') as $key) {
 			if (!($value = $this->_package[$key])) {
@@ -143,10 +153,8 @@ class Packager {
 
 			switch ($key) {
 				case 'name':
-					$output .= sprintf(" * %s\n", $value);
-				break;
 				case 'description':
-					$output .= sprintf(" * %s\n\n", $value);
+					$output .= sprintf(" * %s\n", $value);
 				break;
 				case 'authors':
 					$authors = array();
@@ -161,22 +169,36 @@ class Packager {
 						$authors[] = $string;
 					}
 
-					$output .= sprintf(" * @%s\t%s\n", $key, implode(', ', $value));
+					$output .= sprintf(" * @%s\t\t%s\n", $key, implode(', ', $authors));
 				break;
 				default:
-					$output .= sprintf(" * @%s\t%s\n", $key, $value);
+					$tabs = "\t\t";
+
+					if ($key === 'copyright') {
+						$output .= " *\n";
+						$tabs = "\t";
+					}
+
+					$output .= sprintf(" * @%s%s%s\n", $key, $tabs, $value);
 				break;
 			}
 		}
 
-		$output .= ' */';
+		$output .= sprintf(" * @package\t\t%s\n", implode(', ', array_keys($this->_manifest)));
+		$output .= " */\n\n";
 
 		foreach ($this->_manifest as $path) {
-			if ($this->_minifier) {
-				$output .= $this->_minifier->minify($path);
-			} else {
-				$output .= $path;
+			if (!file_exists($path)) {
+				throw new Exception(sprintf('Script does not exist at path: %s', $path));
 			}
+
+			if ($this->_minifier) {
+				$contents = $this->_minifier->minify($path);
+			} else {
+				$contents = file_get_contents($path);
+			}
+
+			$output .= trim($contents) . "\n\n";
 		}
 
 		// Write output file
@@ -216,7 +238,7 @@ class Packager {
 	 *
 	 * @access public
 	 * @param string $name
-	 * @return Packager
+	 * @return \mjohnson\packager\Packager
 	 */
 	public function _updateManifest($name) {
 		if (isset($this->_manifest[$name])) {
