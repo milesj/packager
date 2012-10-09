@@ -11,7 +11,8 @@ use mjohnson\packager\Minifier;
 use \Exception;
 
 /**
- * @todo
+ * Parses a package.json file that generates a script and dependency list.
+ * This will be used in the packaging and minifying of a manifest.
  *
  * @package	mjohnson.packager
  * @version	1.0.0
