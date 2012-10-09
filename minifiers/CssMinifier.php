@@ -15,6 +15,7 @@ use \Exception;
  *
  * @package	mjohnson.packager.minifiers
  * @version	1.0.0
+ * @link	http://code.google.com/p/cssmin/
  */
 class CssMinifier implements Minifier {
 

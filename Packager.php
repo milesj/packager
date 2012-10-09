@@ -11,8 +11,8 @@ use mjohnson\packager\Minifier;
 use \Exception;
 
 /**
- * Parses a package.json file that generates a script and dependency list.
- * This will be used in the packaging and minifying of a manifest.
+ * Parses a package.json manifest file that generates a script and dependency list.
+ * This will be used in the packaging and minifying of a scripts into a single file.
  *
  * @package	mjohnson.packager
  * @version	1.0.0
@@ -20,15 +20,7 @@ use \Exception;
 class Packager {
 
 	/**
-	 * Bundles to aggregate.
-	 *
-	 * @access public
-	 * @var array
-	 */
-	protected $_bundles = array();
-
-	/**
-	 * List of scripts within the source path.
+	 * List of scripts from the manifest.
 	 *
 	 * @access protected
 	 * @var array
@@ -36,7 +28,7 @@ class Packager {
 	protected $_scripts = array();
 
 	/**
-	 * List of scripts to minify and aggregate into the output file.
+	 * The parsed package.json file.
 	 *
 	 * @access protected
 	 * @var array
@@ -52,15 +44,15 @@ class Packager {
 	protected $_minifier;
 
 	/**
-	 * The parsed package.json file.
+	 * List of scripts to be packaged.
 	 *
 	 * @access protected
 	 * @var array
 	 */
-	protected $_package;
+	protected $_package = array();
 
 	/**
-	 * Parse the package.json file and determine dependencies.
+	 * Parse the package.json manifest file and determine dependencies.
 	 *
 	 * @access public
 	 * @param string $path
@@ -68,43 +60,43 @@ class Packager {
 	 * @throws \Exception
 	 */
 	public function __construct($path, Minifier $minifier = null) {
+		$path = str_replace('\\', '/', $path);
+
 		if (substr($path, -1) !== '/') {
 			$path .= '/';
 		}
-
-		$path = str_replace('\\', '/', $path);
 
 		if (!file_exists($path . 'package.json')) {
 			throw new Exception('package.json does not exist in source path.');
 		}
 
-		// Parse package
-		$package = array_merge(array(
+		// Parse manifest
+		$manifest = array_merge(array(
 			'name' => '',
 			'description' => '',
+			'version' => '',
 			'copyright' => date('Y'),
 			'link' => '',
 			'license' => '',
 			'sourcePath' => '',
 			'outputFile' => '',
 			'authors' => array(),
+			'includes' => array(),
 			'scripts' => array(),
 			'bundles' => array()
 		), json_decode(file_get_contents($path . 'package.json'), true));
 
-		// Build dependencies
-		$bundles = array();
-		$scripts = array();
+		// Update manifest
+		$manifest['sourcePath'] = $path . $manifest['sourcePath'];
 
-		$package['sourcePath'] = $path . $package['sourcePath'];
-
-		if ($package['outputFile']) {
-			$package['outputFile'] = $path . $package['outputFile'];
+		if ($manifest['outputFile']) {
+			$manifest['outputFile'] = $path . $manifest['outputFile'];
 		}
 
-		if ($package['scripts']) {
-			foreach ($package['scripts'] as $script) {
-				$scripts[$script['name']] = array_merge(array(
+		// Build dependencies
+		if ($manifest['scripts']) {
+			foreach ($manifest['scripts'] as $script) {
+				$this->_scripts[$script['name']] = array_merge(array(
 					'name' => '',
 					'path' => '',
 					'requires' => array(),
@@ -113,42 +105,78 @@ class Packager {
 			}
 		}
 
-		$this->_package = $package;
-		$this->_bundles = $bundles;
-		$this->_scripts = $scripts;
+		$this->_manifest = $manifest;
 
+		// Set Minifier
 		if ($minifier) {
 			$this->_minifier = $minifier;
 		}
 	}
 
 	/**
-	 * Loop through the items and build a manifest.
-	 * Use the manifest to generate the output file.
+	 * Return the parsed manifest.
+	 *
+	 * @access public
+	 * @return array
+	 */
+	public function getManifest() {
+		return $this->_manifest;
+	}
+
+	/**
+	 * Return the current package contents.
+	 *
+	 * @access public
+	 * @return array
+	 */
+	public function getPackage() {
+		return $this->_package;
+	}
+
+	/**
+	 * Return the list of scripts from the manifest.
+	 *
+	 * @access public
+	 * @return array
+	 */
+	public function getScripts() {
+		return $this->_scripts;
+	}
+
+	/**
+	 * Loop through the items and build a package list.
+	 * Use the package to generate the output file.
 	 *
 	 * @access public
 	 * @param array $items
 	 * @return string
 	 * @throws \Exception
 	 */
-	public function package(array $items) {
+	public function package(array $items = array()) {
+		if (!$items) {
+			$items = array_keys($this->_scripts);
+		}
+
+		$manifest = $this->_manifest;
+
+		// Generate package list
 		foreach ($items as $item) {
 			$script = $this->_getScript($item);
 
 			if ($script['requires']) {
 				foreach ($script['requires'] as $req) {
-					$this->_updateManifest($req);
+					$this->_updatePackage($req);
 				}
 			}
 
-			$this->_updateManifest($item);
+			$this->_updatePackage($item);
 		}
 
 		// Minify and aggregate files
 		$output = "/**\n";
 
 		foreach (array('name', 'description', 'copyright', 'link', 'license', 'authors') as $key) {
-			if (!($value = $this->_package[$key])) {
+			if (!($value = $manifest[$key])) {
 				continue;
 			}
 
@@ -185,10 +213,10 @@ class Packager {
 			}
 		}
 
-		$output .= sprintf(" * @package\t\t%s\n", implode(', ', array_keys($this->_manifest)));
+		$output .= sprintf(" * @package\t\t%s\n", implode(', ', array_keys($this->_package)));
 		$output .= " */\n\n";
 
-		foreach ($this->_manifest as $path) {
+		foreach ($this->_package as $path) {
 			if (!file_exists($path)) {
 				throw new Exception(sprintf('Script does not exist at path: %s', $path));
 			}
@@ -199,12 +227,15 @@ class Packager {
 				$contents = file_get_contents($path);
 			}
 
-			$output .= "/* " . str_replace($this->_package['sourcePath'], '', $path) . " */\n";
+			$output .= "/* " . str_replace($manifest['sourcePath'], '', $path) . " */\n";
 			$output .= trim($contents) . "\n\n";
 		}
 
 		// Write output file
-		if ($outputFile = $this->_package['outputFile']) {
+		if ($outputFile = $manifest['outputFile']) {
+			$outputFile = str_replace('{name}', str_replace(' ', '-', strtolower($manifest['name'])), $outputFile);
+			$outputFile = str_replace('{version}', strtolower($manifest['version']), $outputFile);
+
 			$outputFolder = dirname($outputFile);
 
 			if (!file_exists($outputFolder)) {
@@ -212,7 +243,7 @@ class Packager {
 			}
 
 			if (!file_put_contents($outputFile, $output)) {
-				throw new Exception('Failed to package manifest to output file.');
+				throw new Exception('Failed to package scripts to output file.');
 			}
 		}
 
@@ -236,20 +267,20 @@ class Packager {
 	}
 
 	/**
-	 * Update the manifest with a new script dependency.
+	 * Update the package with a new script dependency.
 	 *
 	 * @access public
 	 * @param string $name
 	 * @return \mjohnson\packager\Packager
 	 */
-	public function _updateManifest($name) {
-		if (isset($this->_manifest[$name])) {
+	public function _updatePackage($name) {
+		if (isset($this->_package[$name])) {
 			return $this;
 		}
 
 		$script = $this->_getScript($name);
 
-		$this->_manifest[$name] = $this->_package['sourcePath'] . $script['path'];
+		$this->_package[$name] = $this->_manifest['sourcePath'] . $script['path'];
 
 		return $this;
 	}

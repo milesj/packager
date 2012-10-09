@@ -15,6 +15,7 @@ use \Exception;
  *
  * @package	mjohnson.packager.minifiers
  * @version	1.0.0
+ * @link	https://github.com/rgrove/jsmin-php/
  */
 class JsMinifier implements Minifier {
 
