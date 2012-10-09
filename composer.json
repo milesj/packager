@@ -1,0 +1,23 @@
+{
+	"name": "mjohnson/packager",
+	"type": "library",
+	"description": "A dependency and script packager.",
+	"keywords": ["packager", "package", "manifest", "scripts", "dependency"],
+	"homepage": "http://milesj.me/code/php/packager",
+	"license": "MIT",
+	"authors": [
+		{
+			"name": "Miles Johnson",
+			"homepage": "http://milesj.me"
+		}
+	],
+	"require": {
+		"php": ">=5.3"
+	},
+	"support": {
+		"source": "https://github.com/milesj/php-packager"
+	},
+	"autoload": {
+		"psr-0": { "Packager": "/" }
+	}
+}
