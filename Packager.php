@@ -114,6 +114,25 @@ class Packager {
 	}
 
 	/**
+	 * Update the package with a new script dependency.
+	 *
+	 * @access public
+	 * @param string $name
+	 * @return \mjohnson\packager\Packager
+	 */
+	public function addItem($name) {
+		if (isset($this->_package[$name])) {
+			return $this;
+		}
+
+		$script = $this->getScript($name);
+
+		$this->_package[$name] = $this->_manifest['sourcePath'] . $script['path'];
+
+		return $this;
+	}
+
+	/**
 	 * Return the parsed manifest.
 	 *
 	 * @access public
@@ -131,6 +150,22 @@ class Packager {
 	 */
 	public function getPackage() {
 		return $this->_package;
+	}
+
+	/**
+	 * Get a scripts information, else throw an Exception.
+	 *
+	 * @access public
+	 * @param string $name
+	 * @return array
+	 * @throws \Exception
+	 */
+	public function getScript($name) {
+		if (isset($this->_scripts[$name])) {
+			return $this->_scripts[$name];
+		}
+
+		throw new Exception(sprintf('Script %s does not exist.', $name));
 	}
 
 	/**
@@ -153,23 +188,26 @@ class Packager {
 	 * @throws \Exception
 	 */
 	public function package(array $items = array()) {
+		$manifest = $this->_manifest;
+
 		if (!$items) {
 			$items = array_keys($this->_scripts);
-		}
 
-		$manifest = $this->_manifest;
+		} else if ($manifest['includes']) {
+			$items = array_merge($manifest['includes'], $items);
+		}
 
 		// Generate package list
 		foreach ($items as $item) {
-			$script = $this->_getScript($item);
+			$script = $this->getScript($item);
 
 			if ($script['requires']) {
 				foreach ($script['requires'] as $req) {
-					$this->_updatePackage($req);
+					$this->addItem($req);
 				}
 			}
 
-			$this->_updatePackage($item);
+			$this->addItem($item);
 		}
 
 		// Minify and aggregate files
@@ -248,41 +286,6 @@ class Packager {
 		}
 
 		return $output;
-	}
-
-	/**
-	 * Get a scripts information, else throw an Exception.
-	 *
-	 * @access public
-	 * @param string $name
-	 * @return array
-	 * @throws \Exception
-	 */
-	public function _getScript($name) {
-		if (isset($this->_scripts[$name])) {
-			return $this->_scripts[$name];
-		}
-
-		throw new Exception(sprintf('Script %s does not exist.', $name));
-	}
-
-	/**
-	 * Update the package with a new script dependency.
-	 *
-	 * @access public
-	 * @param string $name
-	 * @return \mjohnson\packager\Packager
-	 */
-	public function _updatePackage($name) {
-		if (isset($this->_package[$name])) {
-			return $this;
-		}
-
-		$script = $this->_getScript($name);
-
-		$this->_package[$name] = $this->_manifest['sourcePath'] . $script['path'];
-
-		return $this;
 	}
 
 }
