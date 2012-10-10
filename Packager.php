@@ -95,10 +95,12 @@ class Packager {
 
 		// Build dependencies
 		if ($manifest['scripts']) {
-			foreach ($manifest['scripts'] as $script) {
-				$this->_scripts[$script['name']] = array_merge(array(
-					'name' => '',
+			foreach ($manifest['scripts'] as $key => $script) {
+				$this->_scripts[$key] = array_merge(array(
+					'title' => '',
+					'description' => '',
 					'path' => '',
+					'category' => 'library',
 					'requires' => array(),
 					'provides' => array()
 				), $script);
@@ -268,6 +270,8 @@ class Packager {
 			$output .= "/* " . str_replace($manifest['sourcePath'], '', $path) . " */\n";
 			$output .= trim($contents) . "\n\n";
 		}
+
+		$output = trim($output);
 
 		// Write output file
 		if ($outputFile = $manifest['outputFile']) {
