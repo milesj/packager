@@ -1,12 +1,18 @@
-# Packager v1.0.0 BETA #
+# Packager v1.0.0 #
 
 A dependency and script packager.
 
 ## Requirements ##
 
 * PHP 5.3
+* JSMin
+* CssMin
 
 ## Features ##
+
+* Parses a manifest file to determine source libraries
+* Allows for minification of source files during aggregation
+* Packages a list of libraries into a single output file
 
 ## Documentation ##
 

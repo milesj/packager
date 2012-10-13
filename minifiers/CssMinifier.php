@@ -13,8 +13,8 @@ use \Exception;
 /**
  * Uses the CssMin class to minify CSS files.
  *
- * @package	mjohnson.packager.minifiers
  * @version	1.0.0
+ * @package	mjohnson.packager.minifiers
  * @link	http://code.google.com/p/cssmin/
  */
 class CssMinifier implements Minifier {
