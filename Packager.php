@@ -14,7 +14,7 @@ use \Exception;
  * Parses a package.json manifest file that generates a script and dependency list.
  * This will be used in the packaging and minifying of a scripts into a single file.
  *
- * @version	1.0.0
+ * @version	1.0.1
  * @package	mjohnson.packager
  */
 class Packager {

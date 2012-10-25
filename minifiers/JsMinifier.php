@@ -13,7 +13,7 @@ use \Exception;
 /**
  * Uses the JSMin class to minify Javascript files.
  *
- * @version	1.0.0
+ * @version	1.0.1
  * @package	mjohnson.packager.minifiers
  * @link	https://github.com/rgrove/jsmin-php/
  */

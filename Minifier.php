@@ -10,7 +10,7 @@ namespace mjohnson\packager;
 /**
  * Interface for script Minification.
  *
- * @version	1.0.0
+ * @version	1.0.1
  * @package	mjohnson.packager
  */
 interface Minifier {

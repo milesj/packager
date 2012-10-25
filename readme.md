@@ -1,4 +1,4 @@
-# Packager v1.0.0 #
+# Packager v1.0.1 #
 
 A dependency and script packager.
 
