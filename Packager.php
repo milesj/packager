@@ -11,8 +11,8 @@ use mjohnson\packager\Minifier;
 use \Exception;
 
 /**
- * Parses a package.json manifest file that generates a script and dependency list.
- * This will be used in the packaging and minifying of a scripts into a single file.
+ * Parses a package.json manifest file that generates an item and dependency list.
+ * This will be used in the packaging and minifying of items into a single file.
  *
  * @version	1.0.1
  * @package	mjohnson.packager
@@ -20,12 +20,12 @@ use \Exception;
 class Packager {
 
 	/**
-	 * List of scripts from the manifest.
+	 * List of items from the manifest.
 	 *
 	 * @access protected
 	 * @var array
 	 */
-	protected $_scripts = array();
+	protected $_items = array();
 
 	/**
 	 * The parsed package.json file.
@@ -44,7 +44,7 @@ class Packager {
 	protected $_minifier;
 
 	/**
-	 * List of scripts to be packaged.
+	 * List of items to be packaged.
 	 *
 	 * @access protected
 	 * @var array
@@ -82,7 +82,7 @@ class Packager {
 			'outputFile' => '',
 			'authors' => array(),
 			'includes' => array(),
-			'scripts' => array(),
+			'contents' => array(),
 			'bundles' => array()
 		), json_decode(file_get_contents($path . 'package.json'), true));
 
@@ -94,16 +94,16 @@ class Packager {
 		}
 
 		// Build dependencies
-		if ($manifest['scripts']) {
-			foreach ($manifest['scripts'] as $key => $script) {
-				$this->_scripts[$key] = array_merge(array(
+		if ($manifest['contents']) {
+			foreach ($manifest['contents'] as $key => $item) {
+				$this->_items[$key] = array_merge(array(
 					'title' => '',
 					'description' => '',
 					'path' => '',
 					'category' => 'library',
 					'requires' => array(),
 					'provides' => array()
-				), $script);
+				), $item);
 			}
 		}
 
@@ -112,7 +112,7 @@ class Packager {
 	}
 
 	/**
-	 * Update the package with a new script dependency.
+	 * Update the package with a new item dependency.
 	 *
 	 * @access public
 	 * @param string $name
@@ -123,9 +123,9 @@ class Packager {
 			return $this;
 		}
 
-		$script = $this->getScript($name);
+		$item = $this->getItem($name);
 
-		$this->_package[$name] = $this->_manifest['sourcePath'] . $script['path'];
+		$this->_package[$name] = $this->_manifest['sourcePath'] . $item['path'];
 
 		return $this;
 	}
@@ -151,29 +151,29 @@ class Packager {
 	}
 
 	/**
-	 * Get a scripts information, else throw an Exception.
+	 * Get a items information, else throw an Exception.
 	 *
 	 * @access public
 	 * @param string $name
 	 * @return array
 	 * @throws \Exception
 	 */
-	public function getScript($name) {
-		if (isset($this->_scripts[$name])) {
-			return $this->_scripts[$name];
+	public function getItem($name) {
+		if (isset($this->_items[$name])) {
+			return $this->_items[$name];
 		}
 
-		throw new Exception(sprintf('Script %s does not exist.', $name));
+		throw new Exception(sprintf('Item %s does not exist.', $name));
 	}
 
 	/**
-	 * Return the list of scripts from the manifest.
+	 * Return the list of items from the manifest.
 	 *
 	 * @access public
 	 * @return array
 	 */
-	public function getScripts() {
-		return $this->_scripts;
+	public function getItems() {
+		return $this->_items;
 	}
 
 	/**
@@ -182,14 +182,15 @@ class Packager {
 	 *
 	 * @access public
 	 * @param array $items
+	 * @param array $options
 	 * @return string
 	 * @throws \Exception
 	 */
-	public function package(array $items = array()) {
+	public function package(array $items = array(), array $options = array()) {
 		$manifest = $this->_manifest;
 
 		if (!$items) {
-			$items = array_keys($this->_scripts);
+			$items = array_keys($this->_items);
 
 		} else if ($manifest['includes']) {
 			$items = array_merge($manifest['includes'], $items);
@@ -197,10 +198,10 @@ class Packager {
 
 		// Generate package list
 		foreach ($items as $item) {
-			$script = $this->getScript($item);
+			$item = $this->getItem($item);
 
-			if ($script['requires']) {
-				foreach ($script['requires'] as $req) {
+			if ($item['requires']) {
+				foreach ($item['requires'] as $req) {
 					$this->addItem($req);
 				}
 			}
@@ -254,7 +255,7 @@ class Packager {
 
 		foreach ($this->_package as $path) {
 			if (!file_exists($path)) {
-				throw new Exception(sprintf('Script does not exist at path: %s', $path));
+				throw new Exception(sprintf('Item does not exist at path: %s', $path));
 			}
 
 			if ($this->_minifier) {
@@ -281,7 +282,7 @@ class Packager {
 			}
 
 			if (!file_put_contents($outputFile, $output)) {
-				throw new Exception('Failed to package scripts to output file.');
+				throw new Exception('Failed to package items to output file.');
 			}
 		}
 
