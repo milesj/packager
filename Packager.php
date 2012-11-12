@@ -124,7 +124,7 @@ class Packager {
 	}
 
 	/**
-	 * Update the package with a new item dependency.
+	 * Update the package with a new item dependency. If the item has requirements or providers, add them.
 	 *
 	 * @access public
 	 * @param string $name
@@ -146,6 +146,13 @@ class Packager {
 		}
 
 		$this->_package[$name] = $item;
+
+		// Include provided dependencies
+		if ($item['provides']) {
+			foreach ($item['provides'] as $req) {
+				$this->addItem($req);
+			}
+		}
 
 		return $this;
 	}
@@ -212,7 +219,7 @@ class Packager {
 			return $this->_minifiers[$type];
 		}
 
-		throw new Exception(sprintf('Minifier %s does not exist.', $type));
+		throw new Exception(sprintf('Minifier for %s does not exist.', $type));
 	}
 
 	/**

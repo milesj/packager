@@ -8,15 +8,15 @@
 namespace mjohnson\packager;
 
 /**
- * Interface for script Minification.
+ * Interface for file Minification.
  *
- * @version	1.0.1
+ * @version	1.0.2
  * @package	mjohnson.packager
  */
 interface Minifier {
 
 	/**
-	 * Minify the script at the path.
+	 * Minify the file at the path.
 	 *
 	 * @access public
 	 * @param string $path

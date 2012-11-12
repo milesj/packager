@@ -13,7 +13,7 @@ use \Exception;
 /**
  * Uses the CssMin class to minify CSS files.
  *
- * @version	1.0.1
+ * @version	1.0.2
  * @package	mjohnson.packager.minifiers
  * @link	http://code.google.com/p/cssmin/
  */
@@ -66,7 +66,7 @@ class CssMinifier implements Minifier {
 	}
 
 	/**
-	 * Minify the script at the path.
+	 * Minify the file at the path.
 	 *
 	 * @access public
 	 * @param string $path
