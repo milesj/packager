@@ -35,4 +35,14 @@ class JsMinifier implements Minifier {
 		return \JSMin::minify(file_get_contents($path));
 	}
 
+	/**
+	 * The type of items this minifier runs against.
+	 *
+	 * @access public
+	 * @return string
+	 */
+	public function type() {
+		return 'js';
+	}
+
 }

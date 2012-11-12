@@ -36,12 +36,12 @@ class Packager {
 	protected $_manifest = array();
 
 	/**
-	 * Minifier instance.
+	 * Loaded minifiers.
 	 *
 	 * @access protected
-	 * @var \mjohnson\packager\Minifier
+	 * @var array
 	 */
-	protected $_minifier;
+	protected $_minifiers = array();
 
 	/**
 	 * List of items to be packaged.
@@ -64,10 +64,10 @@ class Packager {
 	 *
 	 * @access public
 	 * @param string $path
-	 * @param \mjohnson\packager\Minifier $minifier
+	 * @param string $type
 	 * @throws \Exception
 	 */
-	public function __construct($path, Minifier $minifier = null) {
+	public function __construct($path, $type = 'js') {
 		$path = str_replace('\\', '/', $path);
 
 		if (substr($path, -1) !== '/') {
@@ -76,6 +76,13 @@ class Packager {
 
 		if (!file_exists($path . 'package.json')) {
 			throw new Exception('package.json does not exist in source path.');
+		}
+
+		// Backwards support
+		if ($type instanceof Minifier) {
+			$this->addMinifier($type);
+
+			$type = $type->type();
 		}
 
 		// Parse manifest
@@ -104,7 +111,7 @@ class Packager {
 					'title' => '',
 					'description' => '',
 					'path' => '',
-					'type' => 'script',
+					'type' => $type,
 					'category' => 'library',
 					'requires' => array(),
 					'provides' => array()
@@ -114,7 +121,6 @@ class Packager {
 
 		$this->_path = $path;
 		$this->_manifest = $manifest;
-		$this->_minifier = $minifier;
 	}
 
 	/**
@@ -130,6 +136,7 @@ class Packager {
 		}
 
 		$item = $this->getItem($name);
+		$item['source'] = $this->_manifest['sourcePath'] . $item['path'];
 
 		// Include required dependencies
 		if ($item['requires']) {
@@ -138,29 +145,22 @@ class Packager {
 			}
 		}
 
-		$this->_package[$name] = $this->_manifest['sourcePath'] . $item['path'];
+		$this->_package[$name] = $item;
 
 		return $this;
 	}
 
 	/**
-	 * Return the parsed manifest.
+	 * Add a minifier for a specific type.
 	 *
 	 * @access public
-	 * @return array
+	 * @param \mjohnson\packager\minifiers\Minifier $minifier
+	 * @return \mjohnson\packager\Packager
 	 */
-	public function getManifest() {
-		return $this->_manifest;
-	}
+	public function addMinifier(Minifier $minifier) {
+		$this->_minifiers[$minifier->type()] = $minifier;
 
-	/**
-	 * Return the current package contents.
-	 *
-	 * @access public
-	 * @return array
-	 */
-	public function getPackage() {
-		return $this->_package;
+		return $this;
 	}
 
 	/**
@@ -187,6 +187,42 @@ class Packager {
 	 */
 	public function getItems() {
 		return $this->_items;
+	}
+
+	/**
+	 * Return the parsed manifest.
+	 *
+	 * @access public
+	 * @return array
+	 */
+	public function getManifest() {
+		return $this->_manifest;
+	}
+
+	/**
+	 * Get a minifier, else throw an Exception.
+	 *
+	 * @access public
+	 * @param string $type
+	 * @return array
+	 * @throws \Exception
+	 */
+	public function getMinifier($type) {
+		if (isset($this->_minifiers[$type])) {
+			return $this->_minifiers[$type];
+		}
+
+		throw new Exception(sprintf('Minifier %s does not exist.', $type));
+	}
+
+	/**
+	 * Return the current package contents.
+	 *
+	 * @access public
+	 * @return array
+	 */
+	public function getPackage() {
+		return $this->_package;
 	}
 
 	/**
@@ -279,13 +315,15 @@ class Packager {
 			$output .= " */\n\n";
 		}
 
-		foreach ($this->_package as $path) {
+		foreach ($this->_package as $item) {
+			$path = $item['source'];
+
 			if (!file_exists($path)) {
 				throw new Exception(sprintf('Item does not exist at path: %s', $path));
 			}
 
-			if ($this->_minifier) {
-				$contents = $this->_minifier->minify($path);
+			if ($minifier = $this->getMinifier($item['type'])) {
+				$contents = $minifier->minify($path);
 			} else {
 				$contents = file_get_contents($path);
 			}

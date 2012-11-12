@@ -24,4 +24,12 @@ interface Minifier {
 	 */
 	public function minify($path);
 
+	/**
+	 * The type of items this minifier runs against.
+	 *
+	 * @access public
+	 * @return string
+	 */
+	public function type();
+
 }

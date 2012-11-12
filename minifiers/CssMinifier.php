@@ -81,4 +81,14 @@ class CssMinifier implements Minifier {
 		return \CssMin::minify(file_get_contents($path), $this->_filters, $this->_plugins);
 	}
 
+	/**
+	 * The type of items this minifier runs against.
+	 *
+	 * @access public
+	 * @return string
+	 */
+	public function type() {
+		return 'css';
+	}
+
 }
