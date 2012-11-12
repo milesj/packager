@@ -52,6 +52,14 @@ class Packager {
 	protected $_package = array();
 
 	/**
+	 * Path to the package.json file.
+	 *
+	 * @access protected
+	 * @var string
+	 */
+	protected $_path;
+
+	/**
 	 * Parse the package.json manifest file and determine dependencies.
 	 *
 	 * @access public
@@ -89,10 +97,6 @@ class Packager {
 		// Update manifest
 		$manifest['sourcePath'] = $path . $manifest['sourcePath'];
 
-		if ($manifest['outputFile']) {
-			$manifest['outputFile'] = $path . $manifest['outputFile'];
-		}
-
 		// Build dependencies
 		if ($manifest['contents']) {
 			foreach ($manifest['contents'] as $key => $item) {
@@ -100,6 +104,7 @@ class Packager {
 					'title' => '',
 					'description' => '',
 					'path' => '',
+					'type' => 'script',
 					'category' => 'library',
 					'requires' => array(),
 					'provides' => array()
@@ -107,6 +112,7 @@ class Packager {
 			}
 		}
 
+		$this->_path = $path;
 		$this->_manifest = $manifest;
 		$this->_minifier = $minifier;
 	}
@@ -124,6 +130,13 @@ class Packager {
 		}
 
 		$item = $this->getItem($name);
+
+		// Include required dependencies
+		if ($item['requires']) {
+			foreach ($item['requires'] as $req) {
+				$this->addItem($req);
+			}
+		}
 
 		$this->_package[$name] = $this->_manifest['sourcePath'] . $item['path'];
 
@@ -187,7 +200,13 @@ class Packager {
 	 * @throws \Exception
 	 */
 	public function package(array $items = array(), array $options = array()) {
+		$this->_package = array();
+
 		$manifest = $this->_manifest;
+		$options = $options + array(
+			'outputFile' => $manifest['outputFile'],
+			'filterType' => false
+		);
 
 		if (!$items) {
 			$items = array_keys($this->_items);
@@ -197,16 +216,15 @@ class Packager {
 		}
 
 		// Generate package list
-		foreach ($items as $item) {
-			$item = $this->getItem($item);
+		foreach ($items as $name) {
+			$item = $this->getItem($name);
 
-			if ($item['requires']) {
-				foreach ($item['requires'] as $req) {
-					$this->addItem($req);
-				}
+			// Filter out types that do not match
+			if ($options['filterType'] && !in_array($item['type'], (array) $options['filterType'])) {
+				continue;
 			}
 
-			$this->addItem($item);
+			$this->addItem($name);
 		}
 
 		// Minify and aggregate files
@@ -271,7 +289,8 @@ class Packager {
 		$output = trim($output);
 
 		// Write output file
-		if ($outputFile = $manifest['outputFile']) {
+		if ($outputFile = $options['outputFile']) {
+			$outputFile = $this->_path . $outputFile;
 			$outputFile = str_replace('{name}', str_replace(' ', '-', strtolower($manifest['name'])), $outputFile);
 			$outputFile = str_replace('{version}', strtolower($manifest['version']), $outputFile);
 
