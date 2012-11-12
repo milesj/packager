@@ -203,11 +203,17 @@ class Packager {
 		$this->_package = array();
 
 		$manifest = $this->_manifest;
+		$output = '';
+
+		// Merge options
 		$options = $options + array(
 			'outputFile' => $manifest['outputFile'],
-			'filterType' => false
+			'prependPath' => true,
+			'filterType' => false,
+			'docBlocks' => true
 		);
 
+		// Update item list
 		if (!$items) {
 			$items = array_keys($this->_items);
 
@@ -228,48 +234,50 @@ class Packager {
 		}
 
 		// Minify and aggregate files
-		$output = "/**\n";
+		if ($options['docBlocks']) {
+			$output .= "/**\n";
 
-		foreach (array('name', 'description', 'copyright', 'link', 'license', 'authors') as $key) {
-			if (!($value = $manifest[$key])) {
-				continue;
-			}
+			foreach (array('name', 'description', 'copyright', 'link', 'license', 'authors') as $key) {
+				if (!($value = $manifest[$key])) {
+					continue;
+				}
 
-			switch ($key) {
-				case 'name':
-				case 'description':
-					$output .= sprintf(" * %s\n", $value);
-				break;
-				case 'authors':
-					$authors = array();
+				switch ($key) {
+					case 'name':
+					case 'description':
+						$output .= sprintf(" * %s\n", $value);
+					break;
+					case 'authors':
+						$authors = array();
 
-					foreach ($value as $author) {
-						$string = $author['name'];
+						foreach ($value as $author) {
+							$string = $author['name'];
 
-						if (isset($author['homepage'])) {
-							$string .= ' <' . $author['homepage'] . '>';
+							if (isset($author['homepage'])) {
+								$string .= ' <' . $author['homepage'] . '>';
+							}
+
+							$authors[] = $string;
 						}
 
-						$authors[] = $string;
-					}
+						$output .= sprintf(" * @%s\t\t%s\n", $key, implode(', ', $authors));
+					break;
+					default:
+						$tabs = "\t\t";
 
-					$output .= sprintf(" * @%s\t\t%s\n", $key, implode(', ', $authors));
-				break;
-				default:
-					$tabs = "\t\t";
+						if ($key === 'copyright') {
+							$output .= " *\n";
+							$tabs = "\t";
+						}
 
-					if ($key === 'copyright') {
-						$output .= " *\n";
-						$tabs = "\t";
-					}
-
-					$output .= sprintf(" * @%s%s%s\n", $key, $tabs, $value);
-				break;
+						$output .= sprintf(" * @%s%s%s\n", $key, $tabs, $value);
+					break;
+				}
 			}
-		}
 
-		$output .= sprintf(" * @package\t\t%s\n", implode(', ', array_keys($this->_package)));
-		$output .= " */\n\n";
+			$output .= sprintf(" * @package\t\t%s\n", implode(', ', array_keys($this->_package)));
+			$output .= " */\n\n";
+		}
 
 		foreach ($this->_package as $path) {
 			if (!file_exists($path)) {
@@ -282,15 +290,22 @@ class Packager {
 				$contents = file_get_contents($path);
 			}
 
-			$output .= "/* " . str_replace($manifest['sourcePath'], '', $path) . " */\n";
-			$output .= trim($contents) . "\n\n";
+			if ($options['docBlocks']) {
+				$output .= "/* " . str_replace($manifest['sourcePath'], '', $path) . " */\n";
+				$output .= trim($contents) . "\n\n";
+			} else {
+				$output .= trim($contents);
+			}
 		}
 
 		$output = trim($output);
 
 		// Write output file
 		if ($outputFile = $options['outputFile']) {
-			$outputFile = $this->_path . $outputFile;
+			if ($options['prependPath']) {
+				$outputFile = $this->_path . $outputFile;
+			}
+
 			$outputFile = str_replace('{name}', str_replace(' ', '-', strtolower($manifest['name'])), $outputFile);
 			$outputFile = str_replace('{version}', strtolower($manifest['version']), $outputFile);
 
