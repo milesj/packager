@@ -9,6 +9,7 @@ namespace mjohnson\packager;
 
 use mjohnson\packager\Minifier;
 use \Exception;
+use \ZipArchive;
 
 /**
  * Parses a package.json manifest file that generates an item and dependency list.
@@ -233,6 +234,38 @@ class Packager {
 	}
 
 	/**
+	 * Format a file name by replacing with the manifest name and version.
+	 * Check that the parent folder exists and is writable.
+	 *
+	 * @access public
+	 * @param string $file
+	 * @return string
+	 */
+	public function prepareOutput($file) {
+		$manifest = $this->getManifest();
+
+		if (strpos($file, $this->_path) !== 0) {
+			$file = $this->_path . $file;
+		}
+
+		// Format name
+		$file = str_replace('{name}', preg_replace('/[^a-z0-9]/i', '-', strtolower($manifest['name'])), $file);
+		$file = str_replace('{version}', strtolower($manifest['version']), $file);
+
+		// Prepare folder
+		$folder = dirname($file);
+
+		if (!file_exists($folder)) {
+			mkdir($folder, 0777, true);
+
+		} else if (!is_writable($folder)) {
+			chmod($folder, 0777);
+		}
+
+		return $file;
+	}
+
+	/**
 	 * Loop through the items and build a package list.
 	 * Use the package to generate the output file.
 	 *
@@ -351,14 +384,7 @@ class Packager {
 				$outputFile = $this->_path . $outputFile;
 			}
 
-			$outputFile = str_replace('{name}', str_replace(' ', '-', strtolower($manifest['name'])), $outputFile);
-			$outputFile = str_replace('{version}', strtolower($manifest['version']), $outputFile);
-
-			$outputFolder = dirname($outputFile);
-
-			if (!file_exists($outputFolder)) {
-				mkdir($outputFolder, 0777, true);
-			}
+			$outputFile = $this->prepareOutput($outputFile);
 
 			if (!file_put_contents($outputFile, $output)) {
 				throw new Exception('Failed to package items to output file.');
@@ -366,6 +392,50 @@ class Packager {
 		}
 
 		return $output;
+	}
+
+	/**
+	 * Archive the list of files into a zip file. The output file is relative the the package root.
+	 *
+	 * @access public
+	 * @param string $outputFile
+	 * @param array $files
+	 * @return boolean
+	 * @throws \Exception
+	 */
+	public function archive($outputFile, array $files) {
+		if (!class_exists('ZipArchive')) {
+			throw new Exception('ZipArchive class is required for archiving.');
+		}
+
+		// Check output location
+		if (substr($outputFile, -4) !== '.zip') {
+			$outputFile .= '.zip';
+		}
+
+		$outputFile = $this->prepareOutput($outputFile);
+
+		// Begin archiving
+		$zip = new ZipArchive();
+
+		if (($error = $zip->open($outputFile, ZIPARCHIVE::CREATE)) !== true) {
+			throw new Exception($error);
+		}
+
+		foreach ($files as $file) {
+			$path = $this->_path . $file;
+
+			if (!file_exists($path)) {
+				throw new Exception(sprintf('%s does not exist.', $file));
+
+			} else if (!is_readable($path)) {
+				throw new Exception(sprintf('%s is not readable.', $file));
+			}
+
+			$zip->addFile($path, basename($file));
+		}
+
+		return $zip->close();
 	}
 
 }
