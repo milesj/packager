@@ -378,7 +378,7 @@ class Packager {
 
 		$output = trim($output);
 
-		// Write output file
+		// Write output to file
 		if ($outputFile = $options['outputFile']) {
 			if ($options['prependPath']) {
 				$outputFile = $this->_path . $outputFile;
@@ -423,16 +423,30 @@ class Packager {
 		}
 
 		foreach ($files as $file) {
-			$path = $this->_path . $file;
-
-			if (!file_exists($path)) {
-				throw new Exception(sprintf('%s does not exist.', $file));
-
-			} else if (!is_readable($path)) {
-				throw new Exception(sprintf('%s is not readable.', $file));
+			if (is_string($file)) {
+				$file = array('path' => $file);
 			}
 
-			$zip->addFile($path, basename($file));
+			$file = $file + array(
+				'path' => '',
+				'name' => '',
+				'folder' => ''
+			);
+
+			$path = $this->_path . $file['path'];
+
+			if (!file_exists($path)) {
+				throw new Exception(sprintf('%s does not exist.', $file['path']));
+
+			} else if (!is_readable($path)) {
+				throw new Exception(sprintf('%s is not readable.', $file['path']));
+			}
+
+			if ($file['folder']) {
+				$zip->addEmptyDir($file['folder']);
+			}
+
+			$zip->addFile($path, $file['folder'] . ($file['name'] ?: basename($path)));
 		}
 
 		return $zip->close();
