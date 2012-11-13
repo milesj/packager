@@ -13,6 +13,7 @@ A dependency and script packager.
 * Parses a manifest file to determine source libraries
 * Allows for minification of source files during aggregation
 * Packages a list of libraries into a single output file
+* Archives multiple files into a zip file
 
 ## Documentation ##
 

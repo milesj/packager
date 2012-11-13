@@ -2,7 +2,7 @@
 	"name": "mjohnson/packager",
 	"type": "library",
 	"description": "A dependency and script packager.",
-	"keywords": ["packager", "package", "manifest", "scripts", "dependency", "minifier", "css", "js"],
+	"keywords": ["packager", "package", "manifest", "scripts", "dependency", "minifier", "archive", "zip", "css", "js"],
 	"homepage": "http://milesj.me/code/php/packager",
 	"license": "MIT",
 	"authors": [
