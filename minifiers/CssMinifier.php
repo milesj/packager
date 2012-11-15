@@ -49,7 +49,7 @@ class CssMinifier implements Minifier {
 		'ConvertRgbColors' => true,
 		'ConvertNamedColors' => false,
 		'CompressColorValues' => false,
-		'CompressUnitValues' => true,
+		'CompressUnitValues' => false,
 		'CompressExpressionValues' => true
 	);
 
