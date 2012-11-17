@@ -172,6 +172,22 @@ class Packager {
 	}
 
 	/**
+	 * Format a file name by replacing name and version.
+	 *
+	 * @access public
+	 * @param string $name
+	 * @return string
+	 */
+	public function formatName($name) {
+		$manifest = $this->getManifest();
+
+		$name = str_replace('{name}', preg_replace('/[^a-z0-9]/i', '-', strtolower($manifest['name'])), $name);
+		$name = str_replace('{version}', strtolower($manifest['version']), $name);
+
+		return $name;
+	}
+
+	/**
 	 * Get a items information, else throw an Exception.
 	 *
 	 * @access public
@@ -234,26 +250,22 @@ class Packager {
 	}
 
 	/**
-	 * Format a file name by replacing with the manifest name and version.
-	 * Check that the parent folder exists and is writable.
+	 * Prepare the output location and file for writing.
 	 *
 	 * @access public
-	 * @param string $file
+	 * @param string $path
 	 * @return string
 	 */
-	public function prepareOutput($file) {
-		$manifest = $this->getManifest();
-
-		if (strpos($file, $this->_path) !== 0) {
-			$file = $this->_path . $file;
+	public function prepareOutput($path) {
+		if (strpos($path, $this->_path) !== 0) {
+			$path = $this->_path . $path;
 		}
 
 		// Format name
-		$file = str_replace('{name}', preg_replace('/[^a-z0-9]/i', '-', strtolower($manifest['name'])), $file);
-		$file = str_replace('{version}', strtolower($manifest['version']), $file);
+		$path = $this->formatName($path);
 
 		// Prepare folder
-		$folder = dirname($file);
+		$folder = dirname($path);
 
 		if (!file_exists($folder)) {
 			mkdir($folder, 0777, true);
@@ -262,7 +274,7 @@ class Packager {
 			chmod($folder, 0777);
 		}
 
-		return $file;
+		return $path;
 	}
 
 	/**
@@ -433,20 +445,21 @@ class Packager {
 				'folder' => ''
 			);
 
-			$path = $this->_path . $file['path'];
+			$path = $this->formatName($this->_path . $file['path']);
+			$name = $file['name'] ? $this->formatName($file['name']) : basename($path);
 
 			if (!file_exists($path)) {
-				throw new Exception(sprintf('%s does not exist.', $file['path']));
+				throw new Exception(sprintf('%s does not exist.', $name));
 
 			} else if (!is_readable($path)) {
-				throw new Exception(sprintf('%s is not readable.', $file['path']));
+				throw new Exception(sprintf('%s is not readable.', $name));
 			}
 
 			if ($file['folder']) {
 				$zip->addEmptyDir($file['folder']);
 			}
 
-			$zip->addFile($path, $file['folder'] . ($file['name'] ?: basename($path)));
+			$zip->addFile($path, $file['folder'] . $name);
 		}
 
 		return $zip->close();
