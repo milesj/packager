@@ -18,6 +18,7 @@
 		"source": "https://github.com/milesj/php-packager"
 	},
 	"autoload": {
-		"psr-0": { "mjohnson\\Packager": "" }
-	}
+		"psr-0": { "mjohnson\\packager": "" }
+	},
+	"target-dir": "mjohnson/packager"
 }
