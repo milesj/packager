@@ -15,7 +15,7 @@ use \ZipArchive;
  * Parses a package.json manifest file that generates an item and dependency list.
  * This will be used in the packaging and minifying of items into a single file.
  *
- * @version	1.0.1
+ * @version	1.1.0-beta
  * @package	mjohnson.packager
  */
 class Packager {
