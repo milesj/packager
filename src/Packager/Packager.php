@@ -8,7 +8,8 @@
 namespace Packager;
 
 use Packager\Minifier\Minifier;
-use \Exception;
+use \RuntimeException;
+use \InvalidArgumentException;
 use \ZipArchive;
 
 /**
@@ -63,7 +64,7 @@ class Packager {
 	 * @access public
 	 * @param string $path
 	 * @param string $type
-	 * @throws \Exception
+	 * @throws \RuntimeException
 	 */
 	public function __construct($path, $type = 'js') {
 		$path = str_replace('\\', '/', $path);
@@ -73,7 +74,7 @@ class Packager {
 		}
 
 		if (!file_exists($path . 'package.json')) {
-			throw new Exception('package.json does not exist in source path.');
+			throw new RuntimeException('package.json does not exist in source path');
 		}
 
 		// Backwards support
@@ -190,14 +191,14 @@ class Packager {
 	 * @access public
 	 * @param string $name
 	 * @return array
-	 * @throws \Exception
+	 * @throws \InvalidArgumentException
 	 */
 	public function getItem($name) {
 		if (isset($this->_items[$name])) {
 			return $this->_items[$name];
 		}
 
-		throw new Exception(sprintf('Item %s does not exist.', $name));
+		throw new InvalidArgumentException(sprintf('Item %s does not exist', $name));
 	}
 
 	/**
@@ -226,14 +227,14 @@ class Packager {
 	 * @access public
 	 * @param string $type
 	 * @return \Packager\Minifier\Minifier
-	 * @throws \Exception
+	 * @throws \InvalidArgumentException
 	 */
 	public function getMinifier($type) {
 		if (isset($this->_minifiers[$type])) {
 			return $this->_minifiers[$type];
 		}
 
-		throw new Exception(sprintf('Minifier for %s does not exist.', $type));
+		throw new InvalidArgumentException(sprintf('Minifier for %s does not exist', $type));
 	}
 
 	/**
@@ -282,7 +283,7 @@ class Packager {
 	 * @param array $items
 	 * @param array $options
 	 * @return string
-	 * @throws \Exception
+	 * @throws \RuntimeException
 	 */
 	public function package(array $items = array(), array $options = array()) {
 		$this->_package = array();
@@ -368,7 +369,7 @@ class Packager {
 			$path = $item['source'];
 
 			if (!file_exists($path)) {
-				throw new Exception(sprintf('Item does not exist at path: %s', $path));
+				throw new RuntimeException(sprintf('Item does not exist at path: %s', $path));
 			}
 
 			if ($minifier = $this->getMinifier($item['type'])) {
@@ -396,7 +397,7 @@ class Packager {
 			$outputFile = $this->prepareOutput($outputFile);
 
 			if (!file_put_contents($outputFile, $output)) {
-				throw new Exception('Failed to package items to output file.');
+				throw new RuntimeException('Failed to package items to output file');
 			}
 		}
 
@@ -410,11 +411,11 @@ class Packager {
 	 * @param string $outputFile
 	 * @param array $files
 	 * @return boolean
-	 * @throws \Exception
+	 * @throws \RuntimeException
 	 */
 	public function archive($outputFile, array $files) {
 		if (!class_exists('ZipArchive')) {
-			throw new Exception('ZipArchive class is required for archiving.');
+			throw new RuntimeException('ZipArchive class is required for archiving');
 		}
 
 		// Check output location
@@ -446,10 +447,10 @@ class Packager {
 			$name = $file['name'] ? $this->formatName($file['name']) : basename($path);
 
 			if (!file_exists($path)) {
-				throw new Exception(sprintf('%s does not exist.', $name));
+				throw new RuntimeException(sprintf('%s does not exist', $name));
 
 			} else if (!is_readable($path)) {
-				throw new Exception(sprintf('%s is not readable.', $name));
+				throw new RuntimeException(sprintf('%s is not readable', $name));
 			}
 
 			if ($file['folder']) {

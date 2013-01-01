@@ -8,7 +8,7 @@
 namespace Packager\Minifier;
 
 use \CssMin;
-use \Exception;
+use \RuntimeException;
 
 /**
  * Uses the CssMin class to minify CSS files.
@@ -69,11 +69,11 @@ class CssMinifier implements Minifier {
 	 * @access public
 	 * @param string $path
 	 * @return string
-	 * @throws \Exception
+	 * @throws \RuntimeException
 	 */
 	public function minify($path) {
 		if (!class_exists('CssMin')) {
-			throw new Exception('CssMin was not found within the include path.');
+			throw new RuntimeException('CssMin was not found within the include path');
 		}
 
 		return CssMin::minify(file_get_contents($path), $this->_filters, $this->_plugins);

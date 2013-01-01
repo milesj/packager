@@ -8,7 +8,7 @@
 namespace Packager\Minifier;
 
 /**
- * Interface for file minification.
+ * Interface for file minifiers.
  */
 interface Minifier {
 
