@@ -5,17 +5,15 @@
  * @link		http://milesj.me/code/cakephp/utility
  */
 
-namespace mjohnson\packager\minifiers;
+namespace Packager\Minifier;
 
-use mjohnson\packager\Minifier;
+use \JSMin;
 use \Exception;
 
 /**
  * Uses the JSMin class to minify Javascript files.
  *
- * @version	1.0.2
- * @package	mjohnson.packager.minifiers
- * @link	https://github.com/rgrove/jsmin-php/
+ * @link https://github.com/rgrove/jsmin-php/
  */
 class JsMinifier implements Minifier {
 
@@ -32,7 +30,7 @@ class JsMinifier implements Minifier {
 			throw new Exception('JSMin was not found within the include path.');
 		}
 
-		return \JSMin::minify(file_get_contents($path));
+		return JSMin::minify(file_get_contents($path));
 	}
 
 	/**

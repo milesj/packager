@@ -5,17 +5,15 @@
  * @link		http://milesj.me/code/cakephp/utility
  */
 
-namespace mjohnson\packager\minifiers;
+namespace Packager\Minifier;
 
-use mjohnson\packager\Minifier;
+use \CssMin;
 use \Exception;
 
 /**
  * Uses the CssMin class to minify CSS files.
  *
- * @version	1.0.2
- * @package	mjohnson.packager.minifiers
- * @link	http://code.google.com/p/cssmin/
+ * @link http://code.google.com/p/cssmin/
  */
 class CssMinifier implements Minifier {
 
@@ -78,7 +76,7 @@ class CssMinifier implements Minifier {
 			throw new Exception('CssMin was not found within the include path.');
 		}
 
-		return \CssMin::minify(file_get_contents($path), $this->_filters, $this->_plugins);
+		return CssMin::minify(file_get_contents($path), $this->_filters, $this->_plugins);
 	}
 
 	/**

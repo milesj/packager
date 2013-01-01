@@ -5,18 +5,15 @@
  * @link		http://milesj.me/code/cakephp/utility
  */
 
-namespace mjohnson\packager;
+namespace Packager;
 
-use mjohnson\packager\Minifier;
+use Packager\Minifier\Minifier;
 use \Exception;
 use \ZipArchive;
 
 /**
  * Parses a package.json manifest file that generates an item and dependency list.
  * This will be used in the packaging and minifying of items into a single file.
- *
- * @version	1.1.0-beta
- * @package	mjohnson.packager
  */
 class Packager {
 
@@ -129,7 +126,7 @@ class Packager {
 	 *
 	 * @access public
 	 * @param string $name
-	 * @return \mjohnson\packager\Packager
+	 * @return \Packager\Packager
 	 */
 	public function addItem($name) {
 		if (isset($this->_package[$name])) {
@@ -162,8 +159,8 @@ class Packager {
 	 * Add a minifier for a specific type.
 	 *
 	 * @access public
-	 * @param \mjohnson\packager\minifiers\Minifier $minifier
-	 * @return \mjohnson\packager\Packager
+	 * @param \Packager\Minifier\Minifier $minifier
+	 * @return \Packager\Packager
 	 */
 	public function addMinifier(Minifier $minifier) {
 		$this->_minifiers[$minifier->type()] = $minifier;
@@ -224,11 +221,11 @@ class Packager {
 	}
 
 	/**
-	 * Get a minifier, else throw an Exception.
+	 * Get a minifier else throw an Exception.
 	 *
 	 * @access public
 	 * @param string $type
-	 * @return array
+	 * @return \Packager\Minifier\Minifier
 	 * @throws \Exception
 	 */
 	public function getMinifier($type) {

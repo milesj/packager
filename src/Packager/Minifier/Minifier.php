@@ -5,13 +5,10 @@
  * @link		http://milesj.me/code/cakephp/utility
  */
 
-namespace mjohnson\packager;
+namespace Packager\Minifier;
 
 /**
- * Interface for file Minification.
- *
- * @version	1.0.2
- * @package	mjohnson.packager
+ * Interface for file minification.
  */
 interface Minifier {
 
