@@ -1,0 +1,48 @@
+{
+	"name": "Packager",
+	"description": "Example packager project.",
+	"version": "1.0.0",
+	"link": "http://milesj.me/code/php/packager",
+	"license": "MIT",
+	"authors": [
+		{
+			"name": "Miles Johnson",
+			"link": "http://milesj.me"
+		}
+	],
+	"includes": ["js/a"],
+	"contents": {
+		"js/a": {
+			"title": "A",
+			"description": "Common Javascript.",
+			"path": "js/a.js",
+			"type": "js"
+		},
+		"js/b": {
+			"title": "B",
+			"description": "Modular Javascript.",
+			"path": "js/b.js",
+			"type": "js"
+		},
+		"js/c": {
+			"title": "C",
+			"description": "Explicit Javascript.",
+			"requires": ["js/b"],
+			"path": "js/c.js",
+			"type": "js"
+		},
+		"css": {
+			"title": "CSS",
+			"description": "Common stylesheet.",
+			"path": "css/style.css",
+			"type": "css"
+		},
+		"css/mobile": {
+			"title": "Mobile CSS",
+			"description": "Mobile stylesheet.",
+			"provides": ["css"],
+			"path": "css/mobile.css",
+			"type": "css"
+		}
+	}
+}

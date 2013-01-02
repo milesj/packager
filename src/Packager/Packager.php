@@ -8,6 +8,7 @@
 namespace Packager;
 
 use Packager\Minifier\Minifier;
+use \Exception;
 use \RuntimeException;
 use \InvalidArgumentException;
 use \ZipArchive;
@@ -92,12 +93,11 @@ class Packager {
 			'copyright' => date('Y'),
 			'link' => '',
 			'license' => '',
-			'sourcePath' => '',
+			'sourcePath' => $path,
 			'outputFile' => '',
 			'authors' => array(),
 			'includes' => array(),
-			'contents' => array(),
-			'bundles' => array()
+			'contents' => array()
 		), json_decode(file_get_contents($path . 'package.json'), true));
 
 		// Update manifest
@@ -105,8 +105,8 @@ class Packager {
 
 		// Build dependencies
 		if ($manifest['contents']) {
-			foreach ($manifest['contents'] as $key => $item) {
-				$this->_items[$key] = array_merge(array(
+			foreach ($manifest['contents'] as $key => &$item) {
+				$item = array_merge(array(
 					'title' => '',
 					'description' => '',
 					'path' => '',
@@ -115,6 +115,8 @@ class Packager {
 					'requires' => array(),
 					'provides' => array()
 				), $item);
+
+				$this->_items[$key] = $item;
 			}
 		}
 
@@ -372,9 +374,9 @@ class Packager {
 				throw new RuntimeException(sprintf('Item does not exist at path: %s', $path));
 			}
 
-			if ($minifier = $this->getMinifier($item['type'])) {
-				$contents = $minifier->minify($path);
-			} else {
+			try {
+				$contents = $this->getMinifier($item['type'])->minify($path);
+			} catch (Exception $e) {
 				$contents = file_get_contents($path);
 			}
 
