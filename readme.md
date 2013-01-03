@@ -1,4 +1,4 @@
-# Packager v2.0.0-beta #
+# Packager v2.0.0-rc1 #
 
 A dependency and script packager for static assets.
 
