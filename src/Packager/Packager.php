@@ -7,7 +7,7 @@
 
 namespace Packager;
 
-use Packager\Minifier\Minifier;
+use Packager\Minifier;
 use \Exception;
 use \RuntimeException;
 use \InvalidArgumentException;
@@ -93,7 +93,7 @@ class Packager {
 			'copyright' => date('Y'),
 			'link' => '',
 			'license' => '',
-			'sourcePath' => $path,
+			'sourcePath' => '',
 			'outputFile' => '',
 			'authors' => array(),
 			'includes' => array(),
@@ -162,7 +162,7 @@ class Packager {
 	 * Add a minifier for a specific type.
 	 *
 	 * @access public
-	 * @param \Packager\Minifier\Minifier $minifier
+	 * @param \Packager\Minifier $minifier
 	 * @return \Packager\Packager
 	 */
 	public function addMinifier(Minifier $minifier) {
@@ -228,7 +228,7 @@ class Packager {
 	 *
 	 * @access public
 	 * @param string $type
-	 * @return \Packager\Minifier\Minifier
+	 * @return \Packager\Minifier
 	 * @throws \InvalidArgumentException
 	 */
 	public function getMinifier($type) {
@@ -431,7 +431,7 @@ class Packager {
 		$zip = new ZipArchive();
 
 		if (($error = $zip->open($outputFile, ZIPARCHIVE::CREATE)) !== true) {
-			throw new Exception($error);
+			throw new RuntimeException($error);
 		}
 
 		foreach ($files as $file) {

@@ -1,0 +1,13 @@
+
+body {
+	background: #000;
+	color: #fff;
+}
+
+/* Some comments */
+
+.class { margin: 0; }
+
+#id {
+	padding: 0;
+	border: 1px solid red; }

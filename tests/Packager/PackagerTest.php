@@ -192,7 +192,7 @@ class PackagerTest extends \PHPUnit_Framework_TestCase {
 		}
 
 		$this->object->addMinifier(new CssMinifier());
-		$this->assertInstanceOf('\Packager\Minifier\Minifier', $this->object->getMinifier('css'));
+		$this->assertInstanceOf('\Packager\Minifier', $this->object->getMinifier('css'));
 	}
 
 	/**

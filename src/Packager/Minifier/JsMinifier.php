@@ -7,13 +7,11 @@
 
 namespace Packager\Minifier;
 
-use \JSMin;
-use \RuntimeException;
+use Packager\Minifier;
+use JsMin\Minify;
 
 /**
  * Uses the JSMin class to minify Javascript files.
- *
- * @link https://github.com/rgrove/jsmin-php/
  */
 class JsMinifier implements Minifier {
 
@@ -23,14 +21,9 @@ class JsMinifier implements Minifier {
 	 * @access public
 	 * @param string $path
 	 * @return string
-	 * @throws \RuntimeException
 	 */
 	public function minify($path) {
-		if (!class_exists('JSMin')) {
-			throw new RuntimeException('JSMin was not found within the include path');
-		}
-
-		return JSMin::minify(file_get_contents($path));
+		return Minify::minify(file_get_contents($path));
 	}
 
 	/**

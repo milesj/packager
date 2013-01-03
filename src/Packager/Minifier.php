@@ -5,7 +5,7 @@
  * @link		http://milesj.me/code/php/packager
  */
 
-namespace Packager\Minifier;
+namespace Packager;
 
 /**
  * Interface for file minifiers.
