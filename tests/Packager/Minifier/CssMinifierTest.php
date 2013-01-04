@@ -16,8 +16,9 @@ class CssMinifierTest extends \PHPUnit_Framework_TestCase {
 	 */
 	public function testMinify() {
 		$object = new CssMinifier();
+		$content = file_get_contents(TEST_DIR . '/project/css/test.css');
 
-		$this->assertEquals('body{background:#000;color:#fff}.class{margin:0}#id{padding:0;border:1px solid red}', $object->minify(TEST_DIR . '/project/css/test.css'));
+		$this->assertEquals('body{background:#000;color:#fff}.class{margin:0}#id{padding:0;border:1px solid red}', $object->minify($content));
 	}
 
 }

@@ -16,8 +16,9 @@ class JsMinifierTest extends \PHPUnit_Framework_TestCase {
 	 */
 	public function testMinify() {
 		$object = new JsMinifier();
+		$content = file_get_contents(TEST_DIR . '/project/js/test.js');
 
-		$this->assertEquals('var Test={list:[],map:{},func:function(arg){console.log(arg);}};', $object->minify(TEST_DIR . '/project/js/test.js'));
+		$this->assertEquals('var Test={list:[],map:{},func:function(arg){console.log(arg);}};', $object->minify($content));
 	}
 
 }

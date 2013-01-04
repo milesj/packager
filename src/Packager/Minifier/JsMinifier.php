@@ -16,14 +16,14 @@ use JsMin\Minify;
 class JsMinifier implements Minifier {
 
 	/**
-	 * Minify the file at the path.
+	 * Minify the file content.
 	 *
 	 * @access public
-	 * @param string $path
+	 * @param string $content
 	 * @return string
 	 */
-	public function minify($path) {
-		return Minify::minify(file_get_contents($path));
+	public function minify($content) {
+		return Minify::minify($content);
 	}
 
 	/**

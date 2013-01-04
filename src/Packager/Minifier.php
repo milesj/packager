@@ -13,13 +13,13 @@ namespace Packager;
 interface Minifier {
 
 	/**
-	 * Minify the file at the path.
+	 * Minify the file content.
 	 *
 	 * @access public
-	 * @param string $path
+	 * @param string $content
 	 * @return string
 	 */
-	public function minify($path);
+	public function minify($content);
 
 	/**
 	 * The type of items this minifier runs against.

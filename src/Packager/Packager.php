@@ -374,10 +374,11 @@ class Packager {
 				throw new RuntimeException(sprintf('Item does not exist at path: %s', $path));
 			}
 
+			$contents = file_get_contents($path);
+
 			try {
-				$contents = $this->getMinifier($item['type'])->minify($path);
+				$contents = $this->getMinifier($item['type'])->minify($contents);
 			} catch (Exception $e) {
-				$contents = file_get_contents($path);
 			}
 
 			if ($options['docBlocks']) {

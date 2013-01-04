@@ -9,13 +9,13 @@ error_reporting(E_ALL | E_STRICT);
 
 // Set constants
 define('TEST_DIR', __DIR__);
-define('VENDOR_DIR', dirname(TEST_DIR) . '/vendor/');
+define('VENDOR_DIR', dirname(TEST_DIR) . '/vendor');
 
 // Ensure that composer has installed all dependencies
-if (!file_exists(VENDOR_DIR . 'autoload.php')) {
+if (!file_exists(VENDOR_DIR . '/autoload.php')) {
 	exit('Please install composer before running tests!');
 }
 
 // Include the composer autoloader
-$loader = require VENDOR_DIR . 'autoload.php';
+$loader = require VENDOR_DIR . '/autoload.php';
 $loader->add('Packager', TEST_DIR);

@@ -62,14 +62,14 @@ class CssMinifier implements Minifier {
 	}
 
 	/**
-	 * Minify the file at the path.
+	 * Minify the file content.
 	 *
 	 * @access public
-	 * @param string $path
+	 * @param string $content
 	 * @return string
 	 */
-	public function minify($path) {
-		return CssMin::minify(file_get_contents($path), $this->_filters, $this->_plugins);
+	public function minify($content) {
+		return CssMin::minify($content, $this->_filters, $this->_plugins);
 	}
 
 	/**
