@@ -325,14 +325,17 @@ class Packager {
 		if ($options['docBlocks']) {
 			$output .= "/**\n";
 
-			foreach (array('name', 'description', 'copyright', 'link', 'license', 'authors') as $key) {
+			foreach (array('name', 'copyright', 'link', 'license', 'authors', 'version') as $key) {
 				if (!($value = $manifest[$key])) {
 					continue;
 				}
 
 				switch ($key) {
 					case 'name':
-					case 'description':
+						if (!empty($manifest['description'])) {
+							$value .= ' - ' . $manifest['description'];
+						}
+
 						$output .= sprintf(" * %s\n", $value);
 					break;
 					case 'authors':
@@ -353,9 +356,12 @@ class Packager {
 					default:
 						$tabs = "\t\t";
 
-						if ($key === 'copyright') {
+						if ($key === 'copyright' || $key === 'version') {
 							$output .= " *\n";
-							$tabs = "\t";
+
+							if ($key === 'copyright') {
+								$tabs = "\t";
+							}
 						}
 
 						$output .= sprintf(" * @%s%s%s\n", $key, $tabs, $value);
