@@ -1,10 +1,10 @@
-# Packager v2.0.0 #
+# Packager v2.0.1 #
 
 A dependency and script packager for static assets.
 
 ## Requirements ##
 
-* PHP 5.3
+* PHP 5.3.0
 * Composer
 * JSMin
 * CssMin
