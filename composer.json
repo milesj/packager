@@ -23,7 +23,7 @@
 		"natxet/CssMin": "Provides CssMin for CSS compression"
 	},
 	"support": {
-		"source": "https://github.com/milesj/Packager"
+		"source": "https://github.com/milesj/packager"
 	},
 	"autoload": {
 		"psr-0": { "Packager": "src/" }
